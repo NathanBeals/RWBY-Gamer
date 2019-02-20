@@ -1,0 +1,11 @@
+//330, 715 (x,y for play all button)
+/// color rgb (15-25, 65-90, 100-140) //a shade of blue
+//1478, 570 (x,y for end turn button) //needs to be held for 3? seconds
+//270 -> 1300, 288 (line for checking if there are any gold cards to but)
+/// if green and red > 100 (the card is gold highlighted)
+///double click on pos + 1/2 cardwidth, pause .5s, click buy button wait
+//buy button (1160, 265), 
+//150, card  width
+
+//520 -> 1020, 700 card in hand line
+//320 -> 1080,522 card upgrade line

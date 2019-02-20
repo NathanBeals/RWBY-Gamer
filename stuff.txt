@@ -1,0 +1,62 @@
+    #TODO: break into method calls (one for the line one for the klicking of effect cards)
+    #Handle cards looking for effects and play them (pick a card from hand to respond)
+''' counter = 0
+    while (counter < card_hand_effect_line_length):
+        pixel = screen[card_hand_effect_line.y, card_hand_effect_line.x + counter]
+
+        r = pixel[0]
+        g = pixel[1]
+        b = pixel[2]
+
+        if (b == 255 and g < 50 and r < 50):
+            card = Point(card_hand_effect_line.x + counter + cardwidth / 3, card_hand_effect_line.y)
+            ap = GetScreenPos(card)
+
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(.1)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(1)
+
+            ap = GetScreenPos(card_activate_button)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(.1)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(1)
+
+            pag.moveTo(mid[0], mid[1])
+            time.sleep(1)
+
+            print("Played Card")
+            return
+        counter += 1
+
+    #look for upgradable cards and upgrade them
+    counter = 0
+    while (counter < card_upgrade_line_length):
+        pixel = screen[card_upgrade_line.y, card_upgrade_line.x + counter]
+
+        r = pixel[0]
+        g = pixel[1]
+        b = pixel[2]
+
+        if (b == 255 and g < 50 and r < 50):
+            card = Point(card_upgrade_line.x + counter + cardwidth / 3, card_upgrade_line.y)
+            ap = GetScreenPos(card)
+
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(.1)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(1)
+
+            ap = GetScreenPos(card_activate_button)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(.1)
+            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            time.sleep(1)
+
+            pag.moveTo(mid[0], mid[1])
+            time.sleep(1)
+
+            print("Upgraded Card")
+            return
+        counter += 1'''
