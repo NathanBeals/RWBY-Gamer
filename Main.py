@@ -46,7 +46,7 @@ def ActivateCard(cardEdge, cardOffset, activateButton, restPosition):
 
     #rest
     pag.moveTo(restPosition.x, restPosition.y)
-    time.sleep(2)
+    time.sleep(.1)
 
     return
 
@@ -62,6 +62,10 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     end_turn_button = Point(1478, 570)
     card_activate_button = Point(1160, 265)
 
+    #reset
+    pag.moveTo(rest.x, rest.y)
+    pag.click();
+
     #Click play all button
     play_all_scan = SL.HScanLine(Point(330, 715), Point(331, 715));
     resultP = play_all_scan.ScanLine(screen, RGB(15,65,100), RGB(30,90,140), 1);
@@ -69,9 +73,10 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         ap = Hooks.GetScreenPos(global_game_coords, resultP)
         pag.click(ap.x, ap.y)
         pag.moveTo(rest.x, rest.y)
-        time.sleep(3)
+        time.sleep(2)
         print("Play All Button Clicked")
         return
+
 
     #Try to Buy the Boss
     #1389, 248 //check for color 40-70r, 0-20g, 90-120b
@@ -82,17 +87,18 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         #click boss
         ap = Hooks.GetScreenPos(global_game_coords, Point(1480, 375))
         pag.click(ap.x, ap.y)
-        time.sleep(.5)
+        time.sleep(.1)
         #click buy boss
         ap = Hooks.GetScreenPos(global_game_coords, Point(785,730))
         pag.moveTo(ap.x, ap.y)
         pag.click(ap.x, ap.y)
-        time.sleep(.5)
+        time.sleep(5)
         #wait for animation
         pag.moveTo(rest.x, rest.y)
-        time.sleep(3)
+        time.sleep(.1)
         print("Play All Button Clicked")
         return
+
 
     #Handle Card Effects (in hand)
     card_hand_effect_scan = SL.HScanLine(Point(520, 700), Point(1120, 700))
@@ -128,6 +134,15 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         return
 
 
+    #Look for upgradable cards and upgrade them
+    play_area_scan = SL.HScanLine(Point(300, 600), Point(1080, 600))
+    resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
+    if (play_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 30, card_activate_button, rest)
+        print("Upgraded Card")
+        return
+
+
     #Buy cards (and handle effects in the buy area)
     buy_area_scan = SL.HScanLine(Point(270, 460), Point(1250, 460)) #bottom of card
     resultP = buy_area_scan.ScanLine(screen, RGB(250,250,90), RGB(255,255,130), 1)
@@ -156,15 +171,6 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         return
 
 
-    #Look for upgradable cards and upgrade them
-    play_area_scan = SL.HScanLine(Point(300, 580), Point(1080, 580))
-    resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
-    if (play_area_scan.IsValidResult(resultP)):
-        ActivateCard(resultP, 30, card_activate_button, rest)
-        print("Upgraded Card")
-        return
-
-
     #click end turn button (has to be held down on occasion)
     end_turn_scan = SL.HScanLine(Point(1478, 570), Point(1479, 570))
     resultP = end_turn_scan.ScanLine(screen, RGB(0,50,80), RGB(50,100,140), 1)
@@ -172,10 +178,10 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         ap = Hooks.GetScreenPos(global_game_coords, resultP)
         pag.moveTo(ap.x, ap.y)
         pag.mouseDown()
-        time.sleep(1)
+        time.sleep(.1)
         pag.mouseUp()
         pag.moveTo(rest.x, rest.y)
-        time.sleep(1)
+        time.sleep(.1)
         print("Played Card")
         return
 
@@ -194,11 +200,11 @@ def MainLoop():
                 if (mouse_pos.x > global_game_coords[0] and mouse_pos.y > global_game_coords[1] and mouse_pos.x < global_game_coords[2] and mouse_pos.y < global_game_coords[3]):
                     break
                 mouse_pos = pag.position()
-                time.sleep(1)
+                time.sleep(.1)
             print("program resumed")
 
         Logic(mouse_pos)
-        time.sleep(20/100)#20 / 1000)
+        time.sleep(.5)#20 / 1000)
 
     return
 
