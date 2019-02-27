@@ -1,63 +1,35 @@
+#Externals
+import time
 import numpy as np
-from PIL import ImageGrab
+from PIL import ImageGrab #HACK: Negative coordinates are ignored by ImageGrab, (monitors left/up of primary)
 import cv2
 import pyautogui as pag
-import time
-from win32 import win32gui
 
-#HACK: only works on primary monitor, negative coords are ignored by screen grab
+#Locals #TODO: figure the term for files written by me, in this place, vs files/modules? pulled in by npm magic
+from Structs import *
+import Win32Hooks as Hooks
 
-import win32gui
-
-from ImportTest import Shark
-
-game_coords = [0, 0, 0, 0]
-
-def winEnumHandler( hwnd, ctx ):
-    global game_coords;
-    if win32gui.IsWindowVisible( hwnd ):
-        #print(hex(hwnd), win32gui.GetWindowText( hwnd ))
-        if (win32gui.GetWindowText(hwnd) == "RWBY Deckbuilding Game"):
-            print(hex(hwnd), win32gui.GetWindowText( hwnd ))
-            rect = win32gui.GetWindowRect(hwnd);
-            game_coords[0] = rect[0]
-            game_coords[1] = rect[1]
-            game_coords[2] = rect[2]
-            game_coords[3] = rect[3]
-
-class Point:
-    def __init__(self, x=0, y=0):
-        self.x = x
-        self.y = y
-
-def GetScreenPos(WindowPos): #TODO: better name
-    global game_coords
-    adjPos = [WindowPos.x + game_coords[0], WindowPos.y + game_coords[1]]
-    return adjPos;
-
-def GetWinPos(ScreenPos): #TODO: better name
-    global game_coords
-    adjPos = [ScreenPos.x - game_coords[0], ScreenPos.y - game_coords[1]]
-    return adjPos;
+global_game_coords = [0, 0, 0, 0]
 
 def Init():
     print("Init")
-    mylocalvar = Shark();
-    mylocalvar.activate();
     print("Getting Screen Bounds")
+    GetBounds()
 
-    win32gui.EnumWindows( winEnumHandler, None );
-
-    print("Screen Pos = left:{}, top:{}, right:{}, bot{}".format(game_coords[0], game_coords[1], game_coords[2], game_coords[3]))
+def GetBounds():
+    global global_game_coords #huh
+    Hooks.GetWindowRects();
+    global_game_coords = Hooks.WindowRects[0];
+    print("Screen Pos = left:{}, top:{}, right:{}, bot{}".format(global_game_coords[0], global_game_coords[1], global_game_coords[2], global_game_coords[3]))
 
 #Move the mouse, check the pixel, click the button
 def Logic(MousePos):
-    windowpos = GetWinPos(MousePos)
+    windowpos = Hooks.GetWinPos(global_game_coords, MousePos)
     #print("X:{} Y:{}".format(windowpos[0], windowpos[1]))
 
-    screen = np.array(ImageGrab.grab(bbox=game_coords))
+    screen = np.array(ImageGrab.grab(bbox=global_game_coords))
     midpoint = Point(200,200)
-    mid = GetScreenPos(midpoint)
+    mid = Hooks.GetScreenPos(global_game_coords, midpoint)
     cardwidth = 150
     play_all_button = Point(330, 715)
     end_turn_button = Point(1478, 570)
@@ -80,7 +52,7 @@ def Logic(MousePos):
     b = pixel[2]
 
     if (r > 15 and r < 30 and g > 65 and g < 90 and b > 100 and b < 140):
-        ap = GetScreenPos(play_all_button)
+        ap = Hooks.GetScreenPos(play_all_button)
         pag.click(ap[0], ap[1])
         pag.moveTo(mid[0], mid[1])
         time.sleep(1)
@@ -101,14 +73,14 @@ def Logic(MousePos):
 
         if ((b == 255 and g < 200 and r < 200) or (b==255 and g==255 and r==0) or (b > 60 and b < 100 and g > 180 and g < 220 and r < 220 and r > 180)):
             card = Point(card_hand_effect_line.x + counter + cardwidth / 5, card_hand_effect_line.y)
-            ap = GetScreenPos(card)
+            ap = Hooks.GetScreenPos(global_game_coords, card)
 
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            ap = GetScreenPos(card_activate_button)
+            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
@@ -135,19 +107,19 @@ def Logic(MousePos):
         b = pixel[2]
 
         card = Point(card_upgrade_line.x + counter, card_upgrade_line.y)
-        ap = GetScreenPos(card)
+        ap = Hooks.GetScreenPos(global_game_coords, card)
         #pag.moveTo(ap[0], ap[1]) #white is a color where r> 100 and g > 100
 
         if (b == 255 and g < 200 and r < 200):
             card = Point(card_upgrade_line.x + counter + cardwidth / 5, card_upgrade_line.y)
-            ap = GetScreenPos(card)
+            ap = Hooks.GetScreenPos(global_game_coords, card)
 
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            ap = GetScreenPos(card_activate_button)
+            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
@@ -175,14 +147,14 @@ def Logic(MousePos):
 
         if ((r > 250 and g > 250 and b > 90 and b < 110) or (r < 150 and g>230 and b>230) or (b==255 and r > 150 and r < 250 and g < 100)):
             card = Point(card_buy_line.x + counter + cardwidth / 5, card_buy_line.y)
-            ap = GetScreenPos(card)
+            ap = Hooks.GetScreenPos(global_game_coords, card)
 
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            ap = GetScreenPos(card_activate_button)
+            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
             time.sleep(.1)
             pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
@@ -208,7 +180,7 @@ def Logic(MousePos):
     b = pixel[2]
 
     if (r > 0 and r < 50 and g > 50 and g < 100 and b > 80 and b < 140):
-        ap = GetScreenPos(end_turn_button)
+        ap = Hooks.GetScreenPos(end_turn_button)
         pag.moveTo(ap[0], ap[1])
         pag.mouseDown()
         time.sleep(1)
@@ -226,10 +198,10 @@ def MainLoop():
         mouse_pos = pag.position()
 
         #only run the application while the mouse is in the window area
-        if (mouse_pos.x < game_coords[0] or mouse_pos.y < game_coords[1] or mouse_pos.x >= game_coords[2] or mouse_pos.y >= game_coords[3]):
+        if (mouse_pos.x < global_game_coords[0] or mouse_pos.y < global_game_coords[1] or mouse_pos.x >= global_game_coords[2] or mouse_pos.y >= global_game_coords[3]):
             print("program paused")
             while True:
-                if (mouse_pos.x > game_coords[0] and mouse_pos.y > game_coords[1] and mouse_pos.x < game_coords[2] and mouse_pos.y < game_coords[3]):
+                if (mouse_pos.x > global_game_coords[0] and mouse_pos.y > global_game_coords[1] and mouse_pos.x < global_game_coords[2] and mouse_pos.y < global_game_coords[3]):
                     break
                 mouse_pos = pag.position()
                 time.sleep(1)
