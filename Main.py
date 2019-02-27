@@ -55,24 +55,12 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     windowpos = Hooks.GetWinPos(global_game_coords, MousePos)
     #print("X:{} Y:{}".format(windowpos[0], windowpos[1]))
 
-
     #Variable Declarations? #HACK: move to seperate file
     screen = np.array(ImageGrab.grab(bbox=global_game_coords))
-    rest = Hooks.GetScreenPos(global_game_coords, Point(100,100))
-    cardwidth = 150 #HACK: not accurate for cards in each position
+    rest = Hooks.GetScreenPos(global_game_coords, Point(100,150))
     play_all_button = Point(330, 715)
     end_turn_button = Point(1478, 570)
     card_activate_button = Point(1160, 265)
-    card_buy_line = Point(270, 280)
-    card_buy_length = 1230 - 270;
-
-    card_hand_effect_line = Point(520, 700);
-    card_hand_effect_line_length = 1020 - 520;
-
-    card_upgrade_line = Point(320, 522);
-    card_upgrade_line_length = 1080 - 522;
-
-
 
     #Click play all button
     play_all_scan = SL.HScanLine(Point(330, 715), Point(331, 715));
@@ -88,21 +76,18 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     #Try to Buy the Boss
     #1389, 248 //check for color 40-70r, 0-20g, 90-120b
     #785,730 -> buy boss Button
-    boss_scan = SL.HScanLine(Point(1389, 248), Point(1390, 248));
+    boss_scan = SL.HScanLine(Point(1390, 248), Point(1420, 248));
     resultP = boss_scan.ScanLine(screen, RGB(40,0,90), RGB(70,20,120), 1);
     if (boss_scan.IsValidResult(resultP)):
         #click boss
-        ap = Hooks.GetScreenPos(global_game_coords, resultP)
+        ap = Hooks.GetScreenPos(global_game_coords, Point(1480, 375))
         pag.click(ap.x, ap.y)
-        time.sleep(.1)
-        pag.click(ap.x, ap.y)
-        time.sleep(1)
+        time.sleep(.5)
         #click buy boss
         ap = Hooks.GetScreenPos(global_game_coords, Point(785,730))
+        pag.moveTo(ap.x, ap.y)
         pag.click(ap.x, ap.y)
-        time.sleep(.1)
-        pag.click(ap.x, ap.y)
-        time.sleep(.1)
+        time.sleep(.5)
         #wait for animation
         pag.moveTo(rest.x, rest.y)
         time.sleep(3)
@@ -110,7 +95,7 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         return
 
     #Handle Card Effects (in hand)
-    card_hand_effect_scan = SL.HScanLine(Point(520, 700), Point(1020, 700))
+    card_hand_effect_scan = SL.HScanLine(Point(520, 700), Point(1120, 700))
     #Blue
     resultP = card_hand_effect_scan.ScanLine(screen, RGB(200,200,255), RGB(240,255,255), 1)
     if (card_hand_effect_scan.IsValidResult(resultP)):
@@ -135,26 +120,30 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         ActivateCard(resultP, 50, card_activate_button, rest)
         print("Played Card")
         return
-
-
-    #Look for upgradable cards and upgrade them
-    play_area_scan = SL.HScanLine(Point(300, 580), Point(1080, 580))
-    resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
-    if (play_area_scan.IsValidResult(resultP)):
-        ActivateCard(resultP, 30, card_activate_button, rest)
-        print("Upgraded Card")
+    #Orange
+    resultP = card_hand_effect_scan.ScanLine(screen, RGB(210,70,70), RGB(255,100,100), 1)
+    if (card_hand_effect_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Played Card")
         return
 
 
     #Buy cards (and handle effects in the buy area)
-    buy_area_scan = SL.HScanLine(Point(270, 475), Point(1250, 475)) #bottom of card
-    resultP = buy_area_scan.ScanLine(screen, RGB(250,250,90), RGB(255,255,110), 1)
+    buy_area_scan = SL.HScanLine(Point(270, 460), Point(1250, 460)) #bottom of card
+    resultP = buy_area_scan.ScanLine(screen, RGB(250,250,90), RGB(255,255,130), 1)
     if (buy_area_scan.IsValidResult(resultP)):
         ActivateCard(resultP, 50, card_activate_button, rest)
         print("Bought Card") # not accurate name but good for testing the line
         return
 
-    resultP = buy_area_scan.ScanLine(screen, RGB(150,230,230), RGB(255,255,255), 1)
+        #This one is causeing problems
+        #it's a light blue that happens when a card is going to be placed on the top of deck after purchase
+        #the issue is some cards can also be a very similar shade of this blue, neither is a super common thing (5ish cards are the color, 4 ish cards cause the color)
+        #or maybe it's purple, wah
+        #no wait I think this was coverting white gosh durnit
+        #the buy area is complex
+        #and now I made it purple
+    resultP = buy_area_scan.ScanLine(screen, RGB(255,20,255), RGB(255,70,255), 1)
     if (buy_area_scan.IsValidResult(resultP)):
         ActivateCard(resultP, 50, card_activate_button, rest)
         print("Bought Card")
@@ -164,6 +153,15 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     if (buy_area_scan.IsValidResult(resultP)):
         ActivateCard(resultP, 50, card_activate_button, rest)
         print("Bought Card")
+        return
+
+
+    #Look for upgradable cards and upgrade them
+    play_area_scan = SL.HScanLine(Point(300, 580), Point(1080, 580))
+    resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
+    if (play_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 30, card_activate_button, rest)
+        print("Upgraded Card")
         return
 
 
