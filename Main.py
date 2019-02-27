@@ -178,7 +178,7 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
         ap = Hooks.GetScreenPos(global_game_coords, resultP)
         pag.moveTo(ap.x, ap.y)
         pag.mouseDown()
-        time.sleep(.1)
+        time.sleep(1)
         pag.mouseUp()
         pag.moveTo(rest.x, rest.y)
         time.sleep(.1)
