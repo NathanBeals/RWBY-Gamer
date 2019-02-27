@@ -7,14 +7,15 @@ import pyautogui as pag
 
 #Locals #TODO: figure the term for files written by me, in this place, vs files/modules? pulled in by npm magic
 from Structs import *
+import ScanLines as SL
 import Win32Hooks as Hooks
 
-global_game_coords = [0, 0, 0, 0]
+global_game_coords = [0, 0, 0, 0] #TODO: multiple windows, remove global
 
 def Init():
     print("Init")
     print("Getting Screen Bounds")
-    GetBounds()
+    GetBounds() #turns out I can just place this definition anywhere, neat
 
 def GetBounds():
     global global_game_coords #huh
@@ -23,14 +24,15 @@ def GetBounds():
     print("Screen Pos = left:{}, top:{}, right:{}, bot{}".format(global_game_coords[0], global_game_coords[1], global_game_coords[2], global_game_coords[3]))
 
 #Move the mouse, check the pixel, click the button
-def Logic(MousePos):
+def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     windowpos = Hooks.GetWinPos(global_game_coords, MousePos)
     #print("X:{} Y:{}".format(windowpos[0], windowpos[1]))
 
+
+    #Variable Declarations? #HACK: move to seperate file
     screen = np.array(ImageGrab.grab(bbox=global_game_coords))
-    midpoint = Point(200,200)
-    mid = Hooks.GetScreenPos(global_game_coords, midpoint)
-    cardwidth = 150
+    rest = Hooks.GetScreenPos(global_game_coords, Point(100,100))
+    cardwidth = 150 #HACK: not accurate for cards in each position
     play_all_button = Point(330, 715)
     end_turn_button = Point(1478, 570)
     card_activate_button = Point(1160, 265)
@@ -43,7 +45,21 @@ def Logic(MousePos):
     card_upgrade_line = Point(320, 522);
     card_upgrade_line_length = 1080 - 522;
 
+
+
+
+    play_all_scan = SL.HScanLine(Point(330, 715), Point(331, 715));
+    resultP = play_all_scan.ScanLine(screen, RGB(15,65,100), RGB(30,90,140), 1);
+    if (play_all_scan.IsValidResult(resultP)):
+        ap = Hooks.GetScreenPos(global_game_coords, resultP)
+        pag.click(ap.x, ap.y)
+        pag.moveTo(rest.x, rest.y)
+        time.sleep(1)
+        print("Play All Button Clicked")
+
+
     #Click play all button
+    '''
     pixel = screen[play_all_button.y, play_all_button.x]
     #print("R:{}, G:{}, B{}\n".format(pixel[0], pixel[1], pixel[2]));
 
@@ -52,15 +68,15 @@ def Logic(MousePos):
     b = pixel[2]
 
     if (r > 15 and r < 30 and g > 65 and g < 90 and b > 100 and b < 140):
-        ap = Hooks.GetScreenPos(play_all_button)
-        pag.click(ap[0], ap[1])
-        pag.moveTo(mid[0], mid[1])
+        ap = Hooks.GetScreenPos(global_game_coords, play_all_button)
+        pag.click(ap.x, ap.y)
+        pag.moveTo(rest.x, rest.y)
         time.sleep(1)
         print("Play All Button Clicked")
         return
+        '''
 
-
-
+'''
     #TODO: break into method calls (one for the line one for the klicking of effect cards)
     #Handle cards looking for effects and play them (pick a card from hand to respond)
     counter = 0
@@ -75,18 +91,18 @@ def Logic(MousePos):
             card = Point(card_hand_effect_line.x + counter + cardwidth / 5, card_hand_effect_line.y)
             ap = Hooks.GetScreenPos(global_game_coords, card)
 
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
             ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            pag.moveTo(mid[0], mid[1])
+            pag.moveTo(rest.x, rest.y)
             time.sleep(.1)
 
             print("Played Card")
@@ -108,24 +124,24 @@ def Logic(MousePos):
 
         card = Point(card_upgrade_line.x + counter, card_upgrade_line.y)
         ap = Hooks.GetScreenPos(global_game_coords, card)
-        #pag.moveTo(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+        #pag.moveTo(ap.x, ap.y[0], ap[1]) #white is a color where r> 100 and g > 100
 
         if (b == 255 and g < 200 and r < 200):
             card = Point(card_upgrade_line.x + counter + cardwidth / 5, card_upgrade_line.y)
             ap = Hooks.GetScreenPos(global_game_coords, card)
 
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
             ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            pag.moveTo(mid[0], mid[1])
+            pag.moveTo(rest.x, rest.y)
             time.sleep(.1)
 
             print("Upgraded Card")
@@ -149,18 +165,18 @@ def Logic(MousePos):
             card = Point(card_buy_line.x + counter + cardwidth / 5, card_buy_line.y)
             ap = Hooks.GetScreenPos(global_game_coords, card)
 
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
             ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
-            pag.click(ap[0], ap[1]) #white is a color where r> 100 and g > 100
+            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
             time.sleep(.1)
 
-            pag.moveTo(mid[0], mid[1])
+            pag.moveTo(rest.x, rest.y)
             time.sleep(.1)
 
             print("Bought Card")
@@ -173,24 +189,24 @@ def Logic(MousePos):
 
     #click end turn button
     pixel = screen[end_turn_button.y, end_turn_button.x]
-    print("R:{}, G:{}, B{}\n".format(pixel[0], pixel[1], pixel[2]));
+    print("Mouse: x:{},y:{} | R:{}, G:{}, B{}\n".format(MousePos.x, MousePos.y, pixel[0], pixel[1], pixel[2]));
 
     r = pixel[0]
     g = pixel[1]
     b = pixel[2]
 
     if (r > 0 and r < 50 and g > 50 and g < 100 and b > 80 and b < 140):
-        ap = Hooks.GetScreenPos(end_turn_button)
-        pag.moveTo(ap[0], ap[1])
+        ap = Hooks.GetScreenPos(global_game_coords, end_turn_button)
+        pag.moveTo(ap.x, ap.y)
         pag.mouseDown()
         time.sleep(1)
         pag.mouseUp()
-        pag.moveTo(mid[0], mid[1])
+        pag.moveTo(rest.x, rest.y)
         time.sleep(1)
         print("End Turn Button Pressed")
         return
 
-    return
+    return'''
 
 def MainLoop():
     print("MainLoop")
@@ -212,5 +228,8 @@ def MainLoop():
 
     return
 
+
+#Excecution
 Init()
 MainLoop()
+#End

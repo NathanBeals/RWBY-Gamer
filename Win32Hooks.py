@@ -1,5 +1,6 @@
 #TODO: I'd still rather remove the global variable and just have GetWindowRects return the list of window rects but I'm uncertain
 # of how to syntax my way into passing an new empty array to the winEnumHanlder delegate.
+from Structs import *
 from win32 import win32gui
 
 global WindowRects
@@ -24,9 +25,9 @@ def GetWindowRects():
     win32gui.EnumWindows( winEnumHandler, None )
 
 def GetScreenPos(WinRect, WinPos): #TODO: better name
-    adjPos = [WinPos.x + WinRect[0], WinPos.y + WinRect[1]]
+    adjPos = Point(WinPos.x + WinRect[0], WinPos.y + WinRect[1])
     return adjPos;
 
 def GetWinPos(WinRect, ScreenPos): #TODO: better name
-    adjPos = [ScreenPos.x - WinRect[0], ScreenPos.y - WinRect[1]]
+    adjPos = Point(ScreenPos.x - WinRect[0], ScreenPos.y - WinRect[1])
     return adjPos;
