@@ -7,8 +7,9 @@ from win32 import win32gui
 
 #HACK: only works on primary monitor, negative coords are ignored by screen grab
 
-
 import win32gui
+
+from ImportTest import Shark
 
 game_coords = [0, 0, 0, 0]
 
@@ -41,24 +42,13 @@ def GetWinPos(ScreenPos): #TODO: better name
 
 def Init():
     print("Init")
-    #print("Please move mouse to window origin.\nYou have 3s");
-    #time.sleep(3)
-    #winOrigin = pag.position();
-    #print("Please move mouse to window end.\nYou have 3s");
-    #time.sleep(3)
-    #winEnd = pag.position()
-
-    #game_coords[0] = winOrigin[0]
-    #game_coords[1] = winOrigin[1]
-    #game_coords[2] = winEnd[0]
-    #game_coords[3] = winEnd[1]
+    mylocalvar = Shark();
+    mylocalvar.activate();
     print("Getting Screen Bounds")
-    #time.sleep(2)
 
     win32gui.EnumWindows( winEnumHandler, None );
 
     print("Screen Pos = left:{}, top:{}, right:{}, bot{}".format(game_coords[0], game_coords[1], game_coords[2], game_coords[3]))
-    #time.sleep(2)
 
 #Move the mouse, check the pixel, click the button
 def Logic(MousePos):
@@ -80,19 +70,6 @@ def Logic(MousePos):
 
     card_upgrade_line = Point(320, 522);
     card_upgrade_line_length = 1080 - 522;
-
-    #screen = cv2.cvtColor(screen, cv2.Color_)
-    #NOTE: it's BGR not RGB for accessing the colors (opencv)
-    #NOTE: also maybe not?
-
-    #wx = windowpos[0]
-    #wy = windowpos[1]
-
-    #pixel = screen[wy, wx]
-    #print("R:{}, G:{}, B{}\n".format(pixel[0], pixel[1], pixel[2]));
-
-
-
 
     #Click play all button
     pixel = screen[play_all_button.y, play_all_button.x]
