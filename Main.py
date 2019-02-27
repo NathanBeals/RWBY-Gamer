@@ -1,3 +1,5 @@
+#TODO: make a start turn signal
+
 #Externals
 import time
 import numpy as np
@@ -23,6 +25,31 @@ def GetBounds():
     global_game_coords = Hooks.WindowRects[0];
     print("Screen Pos = left:{}, top:{}, right:{}, bot{}".format(global_game_coords[0], global_game_coords[1], global_game_coords[2], global_game_coords[3]))
 
+#TODO: replace these "double clicks" with a call to double click, I bet there is an actuall delay I can add there
+
+def ActivateCard(cardEdge, cardOffset, activateButton, restPosition):
+    card = Point(cardEdge.x + cardOffset, cardEdge.y)
+    ap = Hooks.GetScreenPos(global_game_coords, card)
+
+    #click card (doubleclick doesn't register so delayed click, although thinking of it now)
+    pag.click(ap.x, ap.y)
+    time.sleep(.1)
+    pag.click(ap.x, ap.y)
+    time.sleep(.1)
+
+    #click activate
+    ap = Hooks.GetScreenPos(global_game_coords, activateButton)
+    pag.click(ap.x, ap.y)
+    time.sleep(.1)
+    pag.click(ap.x, ap.y)
+    time.sleep(.1)
+
+    #rest
+    pag.moveTo(restPosition.x, restPosition.y)
+    time.sleep(2)
+
+    return
+
 #Move the mouse, check the pixel, click the button
 def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
     windowpos = Hooks.GetWinPos(global_game_coords, MousePos)
@@ -47,166 +74,115 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
 
 
 
-
+    #Click play all button
     play_all_scan = SL.HScanLine(Point(330, 715), Point(331, 715));
     resultP = play_all_scan.ScanLine(screen, RGB(15,65,100), RGB(30,90,140), 1);
     if (play_all_scan.IsValidResult(resultP)):
         ap = Hooks.GetScreenPos(global_game_coords, resultP)
         pag.click(ap.x, ap.y)
         pag.moveTo(rest.x, rest.y)
-        time.sleep(1)
-        print("Play All Button Clicked")
-
-
-    #Click play all button
-    '''
-    pixel = screen[play_all_button.y, play_all_button.x]
-    #print("R:{}, G:{}, B{}\n".format(pixel[0], pixel[1], pixel[2]));
-
-    r = pixel[0]
-    g = pixel[1]
-    b = pixel[2]
-
-    if (r > 15 and r < 30 and g > 65 and g < 90 and b > 100 and b < 140):
-        ap = Hooks.GetScreenPos(global_game_coords, play_all_button)
-        pag.click(ap.x, ap.y)
-        pag.moveTo(rest.x, rest.y)
-        time.sleep(1)
+        time.sleep(3)
         print("Play All Button Clicked")
         return
-        '''
 
-'''
-    #TODO: break into method calls (one for the line one for the klicking of effect cards)
-    #Handle cards looking for effects and play them (pick a card from hand to respond)
-    counter = 0
-    while (counter < card_hand_effect_line_length):
-        pixel = screen[card_hand_effect_line.y, card_hand_effect_line.x + counter]
+    #Try to Buy the Boss
+    #1389, 248 //check for color 40-70r, 0-20g, 90-120b
+    #785,730 -> buy boss Button
+    boss_scan = SL.HScanLine(Point(1389, 248), Point(1390, 248));
+    resultP = boss_scan.ScanLine(screen, RGB(40,0,90), RGB(70,20,120), 1);
+    if (boss_scan.IsValidResult(resultP)):
+        #click boss
+        ap = Hooks.GetScreenPos(global_game_coords, resultP)
+        pag.click(ap.x, ap.y)
+        time.sleep(.1)
+        pag.click(ap.x, ap.y)
+        time.sleep(1)
+        #click buy boss
+        ap = Hooks.GetScreenPos(global_game_coords, Point(785,730))
+        pag.click(ap.x, ap.y)
+        time.sleep(.1)
+        pag.click(ap.x, ap.y)
+        time.sleep(.1)
+        #wait for animation
+        pag.moveTo(rest.x, rest.y)
+        time.sleep(3)
+        print("Play All Button Clicked")
+        return
 
-        r = pixel[0]
-        g = pixel[1]
-        b = pixel[2]
-
-        if ((b == 255 and g < 200 and r < 200) or (b==255 and g==255 and r==0) or (b > 60 and b < 100 and g > 180 and g < 220 and r < 220 and r > 180)):
-            card = Point(card_hand_effect_line.x + counter + cardwidth / 5, card_hand_effect_line.y)
-            ap = Hooks.GetScreenPos(global_game_coords, card)
-
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            pag.moveTo(rest.x, rest.y)
-            time.sleep(.1)
-
-            print("Played Card")
-            return
-        counter += 1
-
-
-
-
-
-    #look for upgradable cards and upgrade them
-    counter = 0
-    while (counter < card_upgrade_line_length):
-        pixel = screen[card_upgrade_line.y, card_upgrade_line.x + counter]
-
-        r = pixel[0]
-        g = pixel[1]
-        b = pixel[2]
-
-        card = Point(card_upgrade_line.x + counter, card_upgrade_line.y)
-        ap = Hooks.GetScreenPos(global_game_coords, card)
-        #pag.moveTo(ap.x, ap.y[0], ap[1]) #white is a color where r> 100 and g > 100
-
-        if (b == 255 and g < 200 and r < 200):
-            card = Point(card_upgrade_line.x + counter + cardwidth / 5, card_upgrade_line.y)
-            ap = Hooks.GetScreenPos(global_game_coords, card)
-
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            pag.moveTo(rest.x, rest.y)
-            time.sleep(.1)
-
-            print("Upgraded Card")
-            return
-        counter += 1
+    #Handle Card Effects (in hand)
+    card_hand_effect_scan = SL.HScanLine(Point(520, 700), Point(1020, 700))
+    #Blue
+    resultP = card_hand_effect_scan.ScanLine(screen, RGB(200,200,255), RGB(240,255,255), 1)
+    if (card_hand_effect_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Played Card")
+        return
+    #Blue also
+    resultP = card_hand_effect_scan.ScanLine(screen, RGB(0,255,255), RGB(0,255,255), 1)
+    if (card_hand_effect_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Played Card")
+        return
+    #Yellow?
+    resultP = card_hand_effect_scan.ScanLine(screen, RGB(180,180,60), RGB(220,220,100), 1)
+    if (card_hand_effect_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Played Card")
+        return
+    #Purple?
+    resultP = card_hand_effect_scan.ScanLine(screen, RGB(200,20,240), RGB(255,60,255), 1)
+    if (card_hand_effect_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Played Card")
+        return
 
 
+    #Look for upgradable cards and upgrade them
+    play_area_scan = SL.HScanLine(Point(300, 580), Point(1080, 580))
+    resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
+    if (play_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 30, card_activate_button, rest)
+        print("Upgraded Card")
+        return
 
 
+    #Buy cards (and handle effects in the buy area)
+    buy_area_scan = SL.HScanLine(Point(270, 475), Point(1250, 475)) #bottom of card
+    resultP = buy_area_scan.ScanLine(screen, RGB(250,250,90), RGB(255,255,110), 1)
+    if (buy_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Bought Card") # not accurate name but good for testing the line
+        return
 
-    #Look for buyable cards and buy them
-    counter = 0
-    while (counter < card_buy_length):
-        pixel = screen[card_buy_line.y, card_buy_line.x + counter]
+    resultP = buy_area_scan.ScanLine(screen, RGB(150,230,230), RGB(255,255,255), 1)
+    if (buy_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Bought Card")
+        return
 
-        r = pixel[0]
-        g = pixel[1]
-        b = pixel[2]
-
-        if ((r > 250 and g > 250 and b > 90 and b < 110) or (r < 150 and g>230 and b>230) or (b==255 and r > 150 and r < 250 and g < 100)):
-            card = Point(card_buy_line.x + counter + cardwidth / 5, card_buy_line.y)
-            ap = Hooks.GetScreenPos(global_game_coords, card)
-
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            ap = Hooks.GetScreenPos(global_game_coords, card_activate_button)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-            pag.click(ap.x, ap.y) #white is a color where r> 100 and g > 100
-            time.sleep(.1)
-
-            pag.moveTo(rest.x, rest.y)
-            time.sleep(.1)
-
-            print("Bought Card")
-            return
-        counter += 1
-
-    #return #early return
+    resultP = buy_area_scan.ScanLine(screen, RGB(150,100,255), RGB(250,255,255), 1)
+    if (buy_area_scan.IsValidResult(resultP)):
+        ActivateCard(resultP, 50, card_activate_button, rest)
+        print("Bought Card")
+        return
 
 
-
-    #click end turn button
-    pixel = screen[end_turn_button.y, end_turn_button.x]
-    print("Mouse: x:{},y:{} | R:{}, G:{}, B{}\n".format(MousePos.x, MousePos.y, pixel[0], pixel[1], pixel[2]));
-
-    r = pixel[0]
-    g = pixel[1]
-    b = pixel[2]
-
-    if (r > 0 and r < 50 and g > 50 and g < 100 and b > 80 and b < 140):
-        ap = Hooks.GetScreenPos(global_game_coords, end_turn_button)
+    #click end turn button (has to be held down on occasion)
+    end_turn_scan = SL.HScanLine(Point(1478, 570), Point(1479, 570))
+    resultP = end_turn_scan.ScanLine(screen, RGB(0,50,80), RGB(50,100,140), 1)
+    if (end_turn_scan.IsValidResult(resultP)):
+        ap = Hooks.GetScreenPos(global_game_coords, resultP)
         pag.moveTo(ap.x, ap.y)
         pag.mouseDown()
         time.sleep(1)
         pag.mouseUp()
         pag.moveTo(rest.x, rest.y)
         time.sleep(1)
-        print("End Turn Button Pressed")
+        print("Played Card")
         return
 
-    return'''
+    return
+
 
 def MainLoop():
     print("MainLoop")

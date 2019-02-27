@@ -10,6 +10,7 @@ class HScanLine: #TODO: I might be able to make this a any line a to b pretty ea
         self.ex = end.x
         self.ey = end.y
 
+    #TODO: update list to take an array of color ranges
     def ScanLine(self, screen, highColor, lowColor, increment):
         if (increment < 1): return Point(-1,-1) #infinite loop escape
 
