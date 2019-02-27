@@ -135,7 +135,7 @@ def Logic(MousePos): #HACK: passing mouse position is rather limiting, consider
 
 
     #Look for upgradable cards and upgrade them
-    play_area_scan = SL.HScanLine(Point(300, 600), Point(1080, 600))
+    play_area_scan = SL.HScanLine(Point(300, 620), Point(1080, 620))
     resultP = play_area_scan.ScanLine(screen, RGB(50,50,255), RGB(254,254,255), 1)
     if (play_area_scan.IsValidResult(resultP)):
         ActivateCard(resultP, 30, card_activate_button, rest)
